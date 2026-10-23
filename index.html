@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Óptica Israel — Sistema</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0b1020; --card: #111827; --border: #1f2937; --text: #e5e7eb; --muted: #94a3b8; --primary: #6366f1; --primary-hover: #4f46e5; --success: #22c55e; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .loader { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  #login-view { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+  .login-card { width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .logo { width: 48px; height: 48px; display: grid; place-items: center; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 12px; font-size: 24px; margin-bottom: 16px; }
+  h1 { font-size: 1.5rem; margin-bottom: 6px; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
+  label { display: block; font-size: .85rem; margin-bottom: 6px; color: #cbd5e1; }
+  input, select { width: 100%; padding: 11px 14px; background: #0f172a; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: .95rem; margin-bottom: 16px; font-family: inherit; }
+  input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+  button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: .95rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
+  button:hover:not(:disabled) { background: var(--primary-hover); }
+  button:disabled { opacity: .7; cursor: not-allowed; }
+  .msg { margin-top: 16px; padding: 10px 14px; border-radius: 10px; font-size: .85rem; display: none; }
+  .msg.show { display: block; }
+  .msg.error { background: #7f1d1d; color: #fecaca; }
+  .msg.success { background: #14532d; color: #bbf7d0; }
+
+  #dashboard-view { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .topbar h2 { font-size: 1.25rem; }
+  .user-info { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: var(--muted); }
+  .logout-btn { width: auto; padding: 8px 16px; background: #334155; font-size: .85rem; }
+  .logout-btn:hover { background: #475569; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .stat-label { font-size: .8rem; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-size: 1.6rem; font-weight: 700; color: #818cf8; }
+
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: #0f172a; }
+  .panel-header h3 { font-size: .95rem; color: #cbd5e1; }
+  .btn-add { width: auto; padding: 6px 12px; background: var(--success); font-size: 0.8rem; border-radius: 6px; }
+  .btn-add:hover { background: #16a34a; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #0b1020; color: var(--muted); font-size: .75rem; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99,102,241,.06); }
+  .badge { padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; background: #1e293b; color: #cbd5e1; }
+  .badge.ok { background: #14532d; color: #bbf7d0; }
+  .empty { text-align: center; color: var(--muted); padding: 20px; }
+
+  /* MODALES */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+  .modal-overlay.show { display: flex; }
+  .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+  .modal-content h3 { margin-bottom: 20px; font-size: 1.2rem; }
+  .form-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .form-row .col { flex: 1; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); width: auto; padding: 10px 20px; }
+  .btn-cancel:hover { background: rgba(255,255,255,0.05); }
+  .btn-save { background: var(--primary); width: auto; padding: 10px 20px; }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-view">
+  <div class="login-card">
+    <div class="logo">👓</div>
+    <h1>Iniciar sesión</h1>
+    <p class="sub">Ingresa tus credenciales</p>
+
+    <form id="login-form">
+      <label for="email">Correo</label>
+      <input type="email" id="email" placeholder="admin@optica.com" required />
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      <button type="submit" id="btn">
+        <span id="btn-text">Ingresar</span>
+        <span id="btn-spinner" class="loader" style="display:none;"></span>
+      </button>
+    </form>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard-view">
+  <div class="topbar">
+    <h2>👓 Óptica Israel — Panel de Control</h2>
+    <div class="user-info">
+      <span id="user-email">Cargando...</span>
+      <button class="logout-btn" id="logout-btn">Salir</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div class="stat-label">Ventas Totales</div><div class="stat-value" id="kpi-ventas">...</div></div>
+    <div class="stat"><div class="stat-label">Por Cobrar</div><div class="stat-value" id="kpi-saldo">...</div></div>
+    <div class="stat"><div class="stat-label">Monturas</div><div class="stat-value" id="kpi-monturas">...</div></div>
+    <div class="stat"><div class="stat-label">Órdenes de Taller</div><div class="stat-value" id="kpi-ot">...</div></div>
+  </div>
+
+  <div class="panel">
+    <h3 style="padding: 16px 20px; border-bottom: 1px solid var(--border); background: #0f172a;">🧾 Últimas Ventas</h3>
+    <table id="tabla-ventas">
+      <thead><tr><th>Orden</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead>
+      <tbody><tr><td colspan="5" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- TABLA MONTURAS (CON BOTÓN) -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3>👓 Catálogo de Monturas</h3>
+      <button class="btn-add" id="btn-open-modal-montura">+ Nueva Montura</button>
+    </div>
+    <table id="tabla-monturas">
+      <thead><tr><th>SKU</th><th>Modelo</th><th>Estilo</th><th>Precio</th></tr></thead>
+      <tbody><tr><td colspan="4" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- TABLA CLIENTES (CON BOTÓN) -->
+  <div class="panel">
+    <div class="panel-header">
+      <h3>🧑‍⚕️ Clientes</h3>
+      <button class="btn-add" id="btn-open-modal-cliente">+ Nuevo Cliente</button>
+    </div>
+    <table id="tabla-clientes">
+      <thead><tr><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Ciudad</th></tr></thead>
+      <tbody><tr><td colspan="4" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================= MODAL NUEVO CLIENTE ================= -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal-content">
+    <h3>Registrar Nuevo Cliente</h3>
+    <form id="form-cliente">
+      <div class="form-row">
+        <div class="col"><label>Nombre completo *</label><input type="text" id="c-name" required placeholder="Ej: Juan Pérez" /></div>
+      </div>
+      <div class="form-row">
+        <div class="col"><label>Documento (CI/NIT) *</label><input type="text" id="c-doc" required placeholder="Ej: 12345678" /></div>
+        <div class="col"><label>Teléfono</label><input type="text" id="c-phone" placeholder="Ej: 70000000" /></div>
+      </div>
+      <div class="form-row">
+        <div class="col"><label>Correo Electrónico</label><input type="email" id="c-email" placeholder="correo@ejemplo.com" /></div>
+        <div class="col"><label>Ciudad</label><input type="text" id="c-city" placeholder="Ej: La Paz" /></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="btn-close-modal-cliente">Cancelar</button>
+        <button type="submit" class="btn-save" id="btn-save-client">
+          <span id="save-text-client">Guardar</span><span id="save-spinner-client" class="loader" style="display:none; width:16px; height:16px; border-width:2px;"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL NUEVA MONTURA ================= -->
+<div class="modal-overlay" id="modal-montura">
+  <div class="modal-content">
+    <h3>Registrar Nueva Montura</h3>
+    <form id="form-montura">
+      <div class="form-row">
+        <div class="col"><label>SKU / Código *</label><input type="text" id="m-sku" required placeholder="Ej: IS-CLA-002" /></div>
+        <div class="col"><label>Modelo *</label><input type="text" id="m-model" required placeholder="Ej: Clásica Negra" /></div>
+      </div>
+      <div class="form-row">
+        <div class="col">
+          <label>Estilo *</label>
+          <select id="m-style" required>
+            <option value="CLASICAS">Clásicas</option>
+            <option value="MODERNAS">Modernas</option>
+            <option value="DEPORTIVAS">Deportivas</option>
+            <option value="ELEGANTES">Elegantes</option>
+            <option value="NINOS">Niños</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Color</label>
+          <input type="text" id="m-color" placeholder="Ej: Negro" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col"><label>Precio de Lista (Bs) *</label><input type="number" step="0.01" id="m-price" required placeholder="Ej: 350.00" /></div>
+        <div class="col"><label>Costo (Bs)</label><input type="number" step="0.01" id="m-cost" placeholder="Ej: 120.00" /></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="btn-close-modal-montura">Cancelar</button>
+        <button type="submit" class="btn-save" id="btn-save-montura">
+          <span id="save-text-montura">Guardar</span><span id="save-spinner-montura" class="loader" style="display:none; width:16px; height:16px; border-width:2px;"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SUPABASE_URL      = 'https://uivkgexssblytbuaerjv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpdmtnZXhzc2JseXRidWFlcmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MjU2NjksImV4cCI6MjEwODMwMTY2OX0.LP7bsnx-l-XwGclQxjy_1RWR_YgfmKej9fdWbOPNm14';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Number(n ?? 0).toLocaleString('es-BO', { minimumFractionDigits: 2 });
+
+  // ================= LOGIN =================
+  $('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('btn').disabled = true; $('btn-text').textContent = 'Conectando...'; $('btn-spinner').style.display = 'inline-block';
+
+    const { error } = await supabase.auth.signInWithPassword({ 
+      email: $('email').value.trim(), 
+      password: $('password').value 
+    });
+
+    if (error) {
+      $('msg').textContent = 'Correo o contraseña incorrectos';
+      $('msg').className = 'msg show error';
+      $('btn').disabled = false; $('btn-text').textContent = 'Ingresar'; $('btn-spinner').style.display = 'none';
+    } else {
+      cargarDashboard();
+    }
+  });
+
+  // ================= CARGAR DATOS =================
+  async function cargarDashboard() {
+    $('login-view').style.display = 'none';
+    $('dashboard-view').style.display = 'block';
+    const { data: { user } } = await supabase.auth.getUser();
+    $('user-email').textContent = user?.email || '';
+
+    const [resVentas, resMonturas, resClientes, resOT] = await Promise.all([
+      supabase.from('sales_orders').select('*').order('sales_order_id', { ascending: false }),
+      supabase.from('frames_catalog').select('*').order('frame_id', { ascending: false }),
+      supabase.from('customers').select('*').order('customer_id', { ascending: false }),
+      supabase.from('laboratory_work_orders').select('*', { count: 'exact', head: true })
+    ]);
+
+    // 1. Ventas
+    if (resVentas.data && resVentas.data.length > 0) {
+      document.querySelector('#tabla-ventas tbody').innerHTML = resVentas.data.map(v => `
+        <tr><td>${v.order_number}</td><td>Bs ${fmt(v.total)}</td><td>Bs ${fmt(v.amount_paid)}</td><td>Bs ${fmt(v.balance_due)}</td><td><span class="badge ok">${v.status}</span></td></tr>
+      `).join('');
+      $('kpi-ventas').textContent = `Bs ${fmt(resVentas.data.reduce((acc, v) => acc + Number(v.total), 0))}`;
+      $('kpi-saldo').textContent = `Bs ${fmt(resVentas.data.reduce((acc, v) => acc + Number(v.balance_due), 0))}`;
+    } else {
+      document.querySelector('#tabla-ventas tbody').innerHTML = '<tr><td colspan="5" class="empty">No hay ventas</td></tr>';
+      $('kpi-ventas').textContent = 'Bs 0.00'; $('kpi-saldo').textContent = 'Bs 0.00';
+    }
+
+    // 2. Monturas
+    if (resMonturas.data && resMonturas.data.length > 0) {
+      document.querySelector('#tabla-monturas tbody').innerHTML = resMonturas.data.map(m => `
+        <tr><td>${m.sku}</td><td>${m.model_name}</td><td>${m.style}</td><td>Bs ${fmt(m.list_price)}</td></tr>
+      `).join('');
+      $('kpi-monturas').textContent = resMonturas.data.length;
+    } else {
+      document.querySelector('#tabla-monturas tbody').innerHTML = '<tr><td colspan="4" class="empty">No hay monturas</td></tr>';
+      $('kpi-monturas').textContent = '0';
+    }
+
+    // 3. Clientes
+    if (resClientes.data && resClientes.data.length > 0) {
+      document.querySelector('#tabla-clientes tbody').innerHTML = resClientes.data.map(c => `
+        <tr><td>${c.name}</td><td>${c.document_number || '-'}</td><td>${c.phone || '-'}</td><td>${c.city || '-'}</td></tr>
+      `).join('');
+    } else {
+      document.querySelector('#tabla-clientes tbody').innerHTML = '<tr><td colspan="4" class="empty">No hay clientes</td></tr>';
+    }
+
+    // 4. OT
+    $('kpi-ot').textContent = resOT.count || 0;
+  }
+
+  // ================= NUEVO CLIENTE =================
+  $('btn-open-modal-cliente').addEventListener('click', () => { $('modal-cliente').classList.add('show'); $('form-cliente').reset(); });
+  $('btn-close-modal-cliente').addEventListener('click', () => $('modal-cliente').classList.remove('show'));
+
+  $('form-cliente').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('btn-save-client').disabled = true; $('save-text-client').textContent = '...'; $('save-spinner-client').style.display = 'inline-block';
+
+    const { error } = await supabase.from('customers').insert([{ 
+      name: $('c-name').value.trim(), document_number: $('c-doc').value.trim(), 
+      phone: $('c-phone').value.trim() || null, email: $('c-email').value.trim() || null, 
+      city: $('c-city').value.trim() || null, customer_type: 'MINORISTA'
+    }]);
+
+    if (error) alert('Error: ' + error.message);
+    else { $('modal-cliente').classList.remove('show'); alert('Cliente guardado'); cargarDashboard(); }
+    
+    $('btn-save-client').disabled = false; $('save-text-client').textContent = 'Guardar'; $('save-spinner-client').style.display = 'none';
+  });
+
+  // ================= NUEVA MONTURA =================
+  $('btn-open-modal-montura').addEventListener('click', () => { $('modal-montura').classList.add('show'); $('form-montura').reset(); });
+  $('btn-close-modal-montura').addEventListener('click', () => $('modal-montura').classList.remove('show'));
+
+  $('form-montura').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('btn-save-montura').disabled = true; $('save-text-montura').textContent = '...'; $('save-spinner-montura').style.display = 'inline-block';
+
+    const { error } = await supabase.from('frames_catalog').insert([{ 
+      sku: $('m-sku').value.trim(), model_name: $('m-model').value.trim(), 
+      style: $('m-style').value, color: $('m-color').value.trim() || null,
+      list_price: parseFloat($('m-price').value), cost: parseFloat($('m-cost').value) || 0
+    }]);
+
+    if (error) alert('Error: ' + error.message);
+    else { $('modal-montura').classList.remove('show'); alert('Montura guardada'); cargarDashboard(); }
+    
+    $('btn-save-montura').disabled = false; $('save-text-montura').textContent = 'Guardar'; $('save-spinner-montura').style.display = 'none';
+  });
+
+  // ================= LOGOUT =================
+  $('logout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    $('dashboard-view').style.display = 'none'; $('login-view').style.display = 'grid';
+    $('login-form').reset(); $('msg').className = 'msg';
+    $('btn').disabled = false; $('btn-text').textContent = 'Ingresar'; $('btn-spinner').style.display = 'none';
+  });
+
+  // ================= SESIÓN ACTIVA =================
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) cargarDashboard();
+</script>
+</body>
+</html>
