@@ -3,205 +3,433 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Óptica Israel — Sistema</title>
+<title>Óptica Israel — Sistema de Gestión</title>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0b1020; --card: #111827; --border: #1f2937; --text: #e5e7eb; --muted: #94a3b8; --primary: #6366f1; --primary-hover: #4f46e5; --success: #22c55e; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .loader { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  :root { 
+    --bg: #f3f4f6; --sidebar: #111827; --card: #ffffff; --text: #1f2937; --text-light: #6b7280; 
+    --primary: #4f46e5; --primary-hover: #4338ca; --success: #10b981; --danger: #ef4444; 
+    --warning: #f59e0b; --border: #e5e7eb; --radius: 12px;
+  }
   
-  #login-view { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
-  .login-card { width: 100%; max-width: 400px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
-  .logo { width: 48px; height: 48px; display: grid; place-items: center; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 12px; font-size: 24px; margin-bottom: 16px; }
-  h1 { font-size: 1.5rem; margin-bottom: 6px; }
-  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
-  label { display: block; font-size: .85rem; margin-bottom: 6px; color: #cbd5e1; }
-  input, select { width: 100%; padding: 11px 14px; background: #0f172a; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: .95rem; margin-bottom: 16px; font-family: inherit; }
-  input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
-  button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: .95rem; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
-  button:hover:not(:disabled) { background: var(--primary-hover); }
-  button:disabled { opacity: .7; cursor: not-allowed; }
-  .msg { margin-top: 16px; padding: 10px 14px; border-radius: 10px; font-size: .85rem; display: none; }
-  .msg.show { display: block; }
-  .msg.error { background: #7f1d1d; color: #fecaca; }
-  .msg.success { background: #14532d; color: #bbf7d0; }
-
-  #dashboard-view { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .topbar h2 { font-size: 1.25rem; }
-  .user-info { display: flex; align-items: center; gap: 12px; font-size: .85rem; color: var(--muted); }
-  .logout-btn { width: auto; padding: 8px 16px; background: #334155; font-size: .85rem; }
-  .logout-btn:hover { background: #475569; }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .stat-label { font-size: .8rem; color: var(--muted); margin-bottom: 6px; }
-  .stat-value { font-size: 1.6rem; font-weight: 700; color: #818cf8; }
-
-  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
-  .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: #0f172a; }
-  .panel-header h3 { font-size: .95rem; color: #cbd5e1; }
-  .btn-add { width: auto; padding: 6px 12px; background: var(--success); font-size: 0.8rem; border-radius: 6px; }
-  .btn-add:hover { background: #16a34a; }
-
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  th, td { padding: 12px 20px; text-align: left; border-bottom: 1px solid var(--border); }
-  th { background: #0b1020; color: var(--muted); font-size: .75rem; text-transform: uppercase; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
+  
+  /* LOGIN */
+  #login-view { width: 100%; min-height: 100vh; display: grid; place-items: center; background: var(--sidebar); position: absolute; z-index: 9999; }
+  .login-card { width: 100%; max-width: 400px; background: var(--card); border-radius: 16px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+  .login-logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 30px; justify-content: center; }
+  .login-logo i { font-size: 2rem; }
+  
+  /* LAYOUT */
+  .sidebar { width: 260px; background: var(--sidebar); color: white; display: flex; flex-direction: column; height: 100vh; transition: all 0.3s; overflow-y: auto; }
+  .sidebar-header { padding: 24px; display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-nav { padding: 20px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; color: #9ca3af; text-decoration: none; font-weight: 500; cursor: pointer; transition: 0.2s; }
+  .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+  .nav-item i { font-size: 1.25rem; }
+  
+  .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .topbar { background: var(--card); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .content-area { padding: 32px; overflow-y: auto; flex: 1; }
+  
+  /* CARDS (KPIs) */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 16px; }
+  .kpi-icon { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 1.5rem; }
+  .kpi-icon.blue { background: #e0e7ff; color: #4f46e5; }
+  .kpi-icon.green { background: #d1fae5; color: #10b981; }
+  .kpi-icon.orange { background: #fef3c7; color: #f59e0b; }
+  .kpi-icon.red { background: #fee2e2; color: #ef4444; }
+  .kpi-icon.purple { background: #f3e8ff; color: #9333ea; }
+  .kpi-info h3 { font-size: 0.85rem; color: var(--text-light); font-weight: 500; margin-bottom: 4px; }
+  .kpi-info p { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+  
+  /* TABLES */
+  .panel { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; overflow: hidden; }
+  .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .panel-header h3 { font-size: 1.1rem; font-weight: 600; }
+  .table-responsive { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  th { background: #f9fafb; color: var(--text-light); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  tr:hover td { background: #f9fafb; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(99,102,241,.06); }
-  .badge { padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; background: #1e293b; color: #cbd5e1; }
-  .badge.ok { background: #14532d; color: #bbf7d0; }
-  .empty { text-align: center; color: var(--muted); padding: 20px; }
+  
+  .badge { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+  .badge.success { background: #d1fae5; color: #065f46; }
+  .badge.warning { background: #fef3c7; color: #92400e; }
+  .badge.danger { background: #fee2e2; color: #991b1b; }
+  .badge.info { background: #e0e7ff; color: #3730a3; }
+  
+  /* BUTTONS & INPUTS */
+  button { font-family: inherit; cursor: pointer; border: none; border-radius: 8px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+  .btn-primary { background: var(--primary); color: white; padding: 10px 20px; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-secondary { background: #f3f4f6; color: var(--text); padding: 10px 20px; border: 1px solid var(--border); }
+  .btn-secondary:hover { background: #e5e7eb; }
+  .btn-icon { padding: 8px; border-radius: 6px; color: var(--text-light); background: transparent; }
+  .btn-icon:hover { background: #f3f4f6; color: var(--primary); }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+  
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-light); margin-bottom: 6px; }
+  .form-control { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; color: var(--text); outline: none; font-family: inherit; }
+  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+  .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .form-row .form-group { flex: 1; margin-bottom: 0; }
+  
+  /* MODALS */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-content { background: var(--card); border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: #f9fafb; border-radius: 0 0 16px 16px; }
+  
+  .section-title { font-size: 0.9rem; font-weight: 600; color: var(--primary); margin: 20px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .section-title:first-child { margin-top: 0; }
 
-  /* MODALES */
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-  .modal-overlay.show { display: flex; }
-  .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
-  .modal-content h3 { margin-bottom: 20px; font-size: 1.2rem; }
-  .form-row { display: flex; gap: 12px; margin-bottom: 16px; }
-  .form-row .col { flex: 1; }
-  .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-  .btn-cancel { background: transparent; border: 1px solid var(--border); width: auto; padding: 10px 20px; }
-  .btn-cancel:hover { background: rgba(255,255,255,0.05); }
-  .btn-save { background: var(--primary); width: auto; padding: 10px 20px; }
+  /* TOASTS */
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--card); padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border-left: 4px solid var(--primary); animation: slideIn 0.3s ease; }
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 0; }
+    .sidebar-header { display: none; }
+    .sidebar-nav { flex-direction: row; padding: 10px; }
+    .content-area { padding: 16px; }
+    .form-row { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- LOGIN -->
 <div id="login-view">
   <div class="login-card">
-    <div class="logo">👓</div>
-    <h1>Iniciar sesión</h1>
-    <p class="sub">Ingresa tus credenciales</p>
-
+    <div class="login-logo"><i class="ph ph-eyeglasses"></i> Óptica Israel</div>
     <form id="login-form">
-      <label for="email">Correo</label>
-      <input type="email" id="email" placeholder="admin@optica.com" required />
-      <label for="password">Contraseña</label>
-      <input type="password" id="password" placeholder="••••••••" required />
-      <button type="submit" id="btn">
-        <span id="btn-text">Ingresar</span>
-        <span id="btn-spinner" class="loader" style="display:none;"></span>
-      </button>
+      <div class="form-group"><label>Correo Electrónico</label><input type="email" id="email" class="form-control" placeholder="admin@optica.com" required /></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="password" class="form-control" placeholder="••••••••" required /></div>
+      <button type="submit" class="btn-primary" style="width: 100%; padding: 12px;">Ingresar</button>
     </form>
-    <div class="msg" id="msg"></div>
   </div>
 </div>
 
-<!-- ================= DASHBOARD ================= -->
-<div id="dashboard-view">
-  <div class="topbar">
-    <h2>👓 Óptica Israel — Panel de Control</h2>
-    <div class="user-info">
-      <span id="user-email">Cargando...</span>
-      <button class="logout-btn" id="logout-btn">Salir</button>
+<!-- APP -->
+<div id="app-view" style="display: none; width: 100%; height: 100vh;">
+  <aside class="sidebar">
+    <div class="sidebar-header"><i class="ph ph-eyeglasses" style="font-size: 1.8rem; color: var(--primary);"></i> Óptica Israel</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-target="view-dashboard" onclick="switchView('view-dashboard', this)"><i class="ph ph-squares-four"></i> Dashboard</a>
+      <a class="nav-item" data-target="view-pedidos" onclick="switchView('view-pedidos', this)"><i class="ph ph-clipboard-text"></i> Pedidos</a>
+      <a class="nav-item" data-target="view-clientes" onclick="switchView('view-clientes', this)"><i class="ph ph-users"></i> Clientes</a>
+      
+      <div style="font-size:0.75rem; color:#6b7280; margin: 16px 16px 8px; text-transform:uppercase; font-weight:bold;">Administración</div>
+      <a class="nav-item" data-target="view-admin-monturas" onclick="switchView('view-admin-monturas', this)"><i class="ph ph-glasses"></i> Admin Monturas</a>
+      <a class="nav-item" data-target="view-admin-lentes" onclick="switchView('view-admin-lentes', this)"><i class="ph ph-magnifying-glass"></i> Admin Lentes</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h2 id="page-title">Panel de Control</h2>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span id="user-email" style="font-size: 0.9rem; color: var(--text-light);"></span>
+        <button class="btn-secondary" onclick="logout()"><i class="ph ph-sign-out"></i> Salir</button>
+      </div>
+    </header>
+
+    <div class="content-area">
+      
+      <!-- VISTA: DASHBOARD (Mejorado) -->
+      <div id="view-dashboard" class="view-section">
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-icon blue"><i class="ph ph-users"></i></div><div class="kpi-info"><h3>Total Clientes</h3><p id="kpi-clientes">0</p></div></div>
+          <div class="kpi-card"><div class="kpi-icon orange"><i class="ph ph-clock"></i></div><div class="kpi-info"><h3>Pedidos Pendientes</h3><p id="kpi-pendientes">0</p></div></div>
+          <div class="kpi-card"><div class="kpi-icon green"><i class="ph ph-check-circle"></i></div><div class="kpi-info"><h3>Pedidos Entregados</h3><p id="kpi-entregados">0</p></div></div>
+          <div class="kpi-card"><div class="kpi-icon purple"><i class="ph ph-currency-dollar"></i></div><div class="kpi-info"><h3>Ingresos Totales</h3><p id="kpi-ingresos">Bs 0.00</p></div></div>
+          <div class="kpi-card"><div class="kpi-icon red"><i class="ph ph-receipt"></i></div><div class="kpi-info"><h3>Saldo por Cobrar</h3><p id="kpi-saldo">Bs 0.00</p></div></div>
+        </div>
+        
+        <!-- Tabla: Últimos Pedidos -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Últimos 5 Pedidos</h3>
+            <button class="btn-secondary btn-sm" onclick="switchView('view-pedidos', document.querySelector('[data-target=view-pedidos]'))">Ver todos</button>
+          </div>
+          <div class="table-responsive">
+            <table id="tabla-ultimos-pedidos">
+              <thead><tr><th>Nº</th><th>Cliente</th><th>Total</th><th>Saldo</th><th>Estado</th></tr></thead>
+              <tbody><tr><td colspan="5" style="text-align:center;">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tabla: Pedidos Atrasados -->
+        <div class="panel" id="panel-atrasados" style="display: none;">
+          <div class="panel-header" style="background: #fee2e2; border-bottom-color: #fca5a5;">
+            <h3 style="color: #991b1b;"><i class="ph ph-warning-circle"></i> Alertas de Pedidos Atrasados</h3>
+          </div>
+          <div class="table-responsive">
+            <table id="tabla-atrasados">
+              <thead><tr><th>Nº</th><th>Cliente</th><th>Fecha Estimada</th><th>Estado</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VISTA: PEDIDOS -->
+      <div id="view-pedidos" class="view-section" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Gestión de Pedidos</h3>
+            <button class="btn-primary" onclick="openModalPedido()"><i class="ph ph-plus"></i> Nuevo Pedido</button>
+          </div>
+          <div class="table-responsive">
+            <table id="tabla-pedidos">
+              <thead>
+                <tr><th>Nº</th><th>Cliente</th><th>Lente / Montura</th><th>Total</th><th>Saldo</th><th>Entrega Est.</th><th>Estado</th><th>Acciones</th></tr>
+              </thead>
+              <tbody><tr><td colspan="8" style="text-align:center;">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: CLIENTES -->
+      <div id="view-clientes" class="view-section" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Directorio de Clientes</h3>
+            <button class="btn-primary" onclick="openModalCliente()"><i class="ph ph-plus"></i> Nuevo Cliente</button>
+          </div>
+          <div class="table-responsive">
+            <table id="tabla-clientes">
+              <thead><tr><th>Nombre</th><th>Celular</th><th>CI</th><th>Registro</th></tr></thead>
+              <tbody><tr><td colspan="4" style="text-align:center;">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: ADMIN MONTURAS -->
+      <div id="view-admin-monturas" class="view-section" style="display: none;">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Administrar Catálogo de Monturas</h3>
+            <button class="btn-primary" onclick="openModalMontura()"><i class="ph ph-plus"></i> Nueva Montura</button>
+          </div>
+          <div class="table-responsive">
+            <table id="tabla-admin-monturas">
+              <thead><tr><th>Nombre</th><th>Marca</th><th>Categoría</th><th>Costo</th><th>Precio Venta</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: ADMIN LENTES -->
+      <div id="view-admin-lentes" class="view-section" style="display: none;">
+        <div class="form-row">
+          <div class="panel" style="flex: 1;">
+            <div class="panel-header">
+              <h3>Tipos de Lentes</h3>
+              <button class="btn-secondary btn-sm" onclick="openModalTipoLente()">+ Añadir Tipo</button>
+            </div>
+            <div class="table-responsive">
+              <table id="tabla-tipos-lentes">
+                <thead><tr><th>Tipo</th><th>Estado</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel" style="flex: 2;">
+            <div class="panel-header">
+              <h3>Modelos de Lentes</h3>
+              <button class="btn-primary" onclick="openModalLente()"><i class="ph ph-plus"></i> Nuevo Modelo</button>
+            </div>
+            <div class="table-responsive">
+              <table id="tabla-admin-lentes">
+                <thead><tr><th>Modelo</th><th>Tipo</th><th>Marca</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>
-
-  <div class="grid">
-    <div class="stat"><div class="stat-label">Ventas Totales</div><div class="stat-value" id="kpi-ventas">...</div></div>
-    <div class="stat"><div class="stat-label">Por Cobrar</div><div class="stat-value" id="kpi-saldo">...</div></div>
-    <div class="stat"><div class="stat-label">Monturas</div><div class="stat-value" id="kpi-monturas">...</div></div>
-    <div class="stat"><div class="stat-label">Órdenes de Taller</div><div class="stat-value" id="kpi-ot">...</div></div>
-  </div>
-
-  <div class="panel">
-    <h3 style="padding: 16px 20px; border-bottom: 1px solid var(--border); background: #0f172a;">🧾 Últimas Ventas</h3>
-    <table id="tabla-ventas">
-      <thead><tr><th>Orden</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead>
-      <tbody><tr><td colspan="5" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
-    </table>
-  </div>
-
-  <!-- TABLA MONTURAS (CON BOTÓN) -->
-  <div class="panel">
-    <div class="panel-header">
-      <h3>👓 Catálogo de Monturas</h3>
-      <button class="btn-add" id="btn-open-modal-montura">+ Nueva Montura</button>
-    </div>
-    <table id="tabla-monturas">
-      <thead><tr><th>SKU</th><th>Modelo</th><th>Estilo</th><th>Precio</th></tr></thead>
-      <tbody><tr><td colspan="4" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
-    </table>
-  </div>
-
-  <!-- TABLA CLIENTES (CON BOTÓN) -->
-  <div class="panel">
-    <div class="panel-header">
-      <h3>🧑‍⚕️ Clientes</h3>
-      <button class="btn-add" id="btn-open-modal-cliente">+ Nuevo Cliente</button>
-    </div>
-    <table id="tabla-clientes">
-      <thead><tr><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Ciudad</th></tr></thead>
-      <tbody><tr><td colspan="4" class="empty"><span class="loader"></span> Cargando...</td></tr></tbody>
-    </table>
-  </div>
+  </main>
 </div>
 
-<!-- ================= MODAL NUEVO CLIENTE ================= -->
-<div class="modal-overlay" id="modal-cliente">
+<!-- ================= MODALES ================= -->
+
+<!-- NUEVO PEDIDO -->
+<div class="modal-overlay" id="modal-pedido">
   <div class="modal-content">
-    <h3>Registrar Nuevo Cliente</h3>
-    <form id="form-cliente">
-      <div class="form-row">
-        <div class="col"><label>Nombre completo *</label><input type="text" id="c-name" required placeholder="Ej: Juan Pérez" /></div>
-      </div>
-      <div class="form-row">
-        <div class="col"><label>Documento (CI/NIT) *</label><input type="text" id="c-doc" required placeholder="Ej: 12345678" /></div>
-        <div class="col"><label>Teléfono</label><input type="text" id="c-phone" placeholder="Ej: 70000000" /></div>
-      </div>
-      <div class="form-row">
-        <div class="col"><label>Correo Electrónico</label><input type="email" id="c-email" placeholder="correo@ejemplo.com" /></div>
-        <div class="col"><label>Ciudad</label><input type="text" id="c-city" placeholder="Ej: La Paz" /></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="btn-close-modal-cliente">Cancelar</button>
-        <button type="submit" class="btn-save" id="btn-save-client">
-          <span id="save-text-client">Guardar</span><span id="save-spinner-client" class="loader" style="display:none; width:16px; height:16px; border-width:2px;"></span>
-        </button>
-      </div>
-    </form>
+    <div class="modal-header"><h3>Registrar Nuevo Pedido</h3><button class="btn-icon" onclick="closeModal('modal-pedido')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <form id="form-pedido">
+        <div class="section-title"><i class="ph ph-user"></i> 1. Cliente</div>
+        <div class="form-group"><label>Seleccionar Cliente *</label><select id="p-customer" class="form-control" required></select></div>
+
+        <div class="section-title"><i class="ph ph-eye"></i> 2. Receta</div>
+        <div class="form-row">
+          <div class="form-group"><label>OD SPH</label><input type="number" step="0.25" id="p-od-sph" class="form-control" /></div>
+          <div class="form-group"><label>OD CYL</label><input type="number" step="0.25" id="p-od-cyl" class="form-control" /></div>
+          <div class="form-group"><label>OD EJE</label><input type="number" id="p-od-axis" class="form-control" /></div>
+          <div class="form-group"><label>OD ADD</label><input type="number" step="0.25" id="p-od-add" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>OI SPH</label><input type="number" step="0.25" id="p-oi-sph" class="form-control" /></div>
+          <div class="form-group"><label>OI CYL</label><input type="number" step="0.25" id="p-oi-cyl" class="form-control" /></div>
+          <div class="form-group"><label>OI EJE</label><input type="number" id="p-oi-axis" class="form-control" /></div>
+          <div class="form-group"><label>OI ADD</label><input type="number" step="0.25" id="p-oi-add" class="form-control" /></div>
+        </div>
+
+        <div class="section-title"><i class="ph ph-glasses"></i> 3. Productos</div>
+        <div class="form-row">
+          <div class="form-group"><label>Lente *</label><select id="p-lens" class="form-control" required onchange="calcularTotal()"></select></div>
+          <div class="form-group"><label>Montura *</label><select id="p-frame" class="form-control" required onchange="calcularTotal()"></select></div>
+        </div>
+
+        <div class="section-title"><i class="ph ph-currency-dollar"></i> 4. Economía</div>
+        <div class="form-row">
+          <div class="form-group"><label>Precio Lente (Bs)</label><input type="number" id="p-lens-price" class="form-control" readonly style="background:#f9fafb;" /></div>
+          <div class="form-group"><label>Precio Montura (Bs)</label><input type="number" id="p-frame-price" class="form-control" readonly style="background:#f9fafb;" /></div>
+          <div class="form-group"><label>Descuento (Bs)</label><input type="number" step="0.01" id="p-discount" class="form-control" value="0" oninput="calcularTotal()" /></div>
+        </div>
+        <div style="background: #e0e7ff; padding: 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 600; color: #3730a3;">Total a Pagar:</span>
+          <span id="p-total-display" style="font-size: 1.5rem; font-weight: 700; color: #3730a3;">Bs 0.00</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Anticipo (Bs)</label><input type="number" step="0.01" id="p-advance" class="form-control" value="0" /></div>
+          <div class="form-group"><label>Fecha Entrega</label><input type="date" id="p-expected-date" class="form-control" required /></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-pedido')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarPedido()">Guardar Pedido</button>
+    </div>
   </div>
 </div>
 
-<!-- ================= MODAL NUEVA MONTURA ================= -->
+<!-- NUEVO CLIENTE -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header"><h3>Registrar Cliente</h3><button class="btn-icon" onclick="closeModal('modal-cliente')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="c-name" class="form-control" required /></div>
+      <div class="form-group"><label>Celular *</label><input type="text" id="c-phone" class="form-control" required /></div>
+      <div class="form-group"><label>CI (Opcional)</label><input type="text" id="c-ci" class="form-control" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarCliente()">Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- GESTIONAR PEDIDO -->
+<div class="modal-overlay" id="modal-ver-pedido">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header"><h3>Detalle del Pedido <span id="ver-order-id"></span></h3><button class="btn-icon" onclick="closeModal('modal-ver-pedido')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <div id="ver-order-content"></div>
+      <div class="section-title" style="margin-top:24px;"><i class="ph ph-wallet"></i> Registrar Pago</div>
+      <div class="form-row">
+        <div class="form-group"><label>Monto (Bs)</label><input type="number" step="0.01" id="pay-amount" class="form-control" /></div>
+        <div class="form-group"><label>Método</label><select id="pay-method" class="form-control"><option value="EFECTIVO">Efectivo</option><option value="QR">QR</option><option value="TRANSFERENCIA">Transferencia</option></select></div>
+      </div>
+      <button class="btn-secondary" style="width:100%;" onclick="registrarPago()">Registrar Abono</button>
+    </div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <button class="btn-secondary" onclick="imprimirComprobante()"><i class="ph ph-printer"></i> Imprimir</button>
+      <button class="btn-primary" id="btn-entregar" onclick="marcarEntregado()"><i class="ph ph-check-circle"></i> Marcar Entregado</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MONTURA -->
 <div class="modal-overlay" id="modal-montura">
   <div class="modal-content">
-    <h3>Registrar Nueva Montura</h3>
-    <form id="form-montura">
+    <div class="modal-header"><h3 id="title-modal-montura">Nueva Montura</h3><button class="btn-icon" onclick="closeModal('modal-montura')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id" />
       <div class="form-row">
-        <div class="col"><label>SKU / Código *</label><input type="text" id="m-sku" required placeholder="Ej: IS-CLA-002" /></div>
-        <div class="col"><label>Modelo *</label><input type="text" id="m-model" required placeholder="Ej: Clásica Negra" /></div>
-      </div>
-      <div class="form-row">
-        <div class="col">
-          <label>Estilo *</label>
-          <select id="m-style" required>
-            <option value="CLASICAS">Clásicas</option>
-            <option value="MODERNAS">Modernas</option>
-            <option value="DEPORTIVAS">Deportivas</option>
-            <option value="ELEGANTES">Elegantes</option>
-            <option value="NINOS">Niños</option>
-          </select>
-        </div>
-        <div class="col">
-          <label>Color</label>
-          <input type="text" id="m-color" placeholder="Ej: Negro" />
-        </div>
+        <div class="form-group"><label>Nombre / Modelo *</label><input type="text" id="m-name" class="form-control" required /></div>
+        <div class="form-group"><label>Marca</label><input type="text" id="m-brand" class="form-control" /></div>
       </div>
       <div class="form-row">
-        <div class="col"><label>Precio de Lista (Bs) *</label><input type="number" step="0.01" id="m-price" required placeholder="Ej: 350.00" /></div>
-        <div class="col"><label>Costo (Bs)</label><input type="number" step="0.01" id="m-cost" placeholder="Ej: 120.00" /></div>
+        <div class="form-group"><label>Categoría</label><input type="text" id="m-category" class="form-control" placeholder="Ej: Deportiva" /></div>
+        <div class="form-group"><label>Color</label><input type="text" id="m-color" class="form-control" /></div>
       </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-cancel" id="btn-close-modal-montura">Cancelar</button>
-        <button type="submit" class="btn-save" id="btn-save-montura">
-          <span id="save-text-montura">Guardar</span><span id="save-spinner-montura" class="loader" style="display:none; width:16px; height:16px; border-width:2px;"></span>
-        </button>
+      <div class="form-row">
+        <div class="form-group"><label>Costo (Bs)</label><input type="number" step="0.01" id="m-cost" class="form-control" /></div>
+        <div class="form-group"><label>Precio Venta (Bs) *</label><input type="number" step="0.01" id="m-price" class="form-control" required /></div>
+        <div class="form-group"><label>Stock</label><input type="number" id="m-stock" class="form-control" value="0" /></div>
       </div>
-    </form>
+      <div class="form-group"><label>Estado</label><select id="m-active" class="form-control"><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-montura')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarMontura()">Guardar Montura</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LENTE -->
+<div class="modal-overlay" id="modal-lente">
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="title-modal-lente">Nuevo Modelo de Lente</h3><button class="btn-icon" onclick="closeModal('modal-lente')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="l-id" />
+      <div class="form-row">
+        <div class="form-group"><label>Nombre / Modelo *</label><input type="text" id="l-name" class="form-control" required /></div>
+        <div class="form-group"><label>Tipo de Lente *</label><select id="l-type" class="form-control" required></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Marca / Fabricante</label><input type="text" id="l-brand" class="form-control" /></div>
+        <div class="form-group"><label>Material / Tratamiento</label><input type="text" id="l-material" class="form-control" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Costo (Bs)</label><input type="number" step="0.01" id="l-cost" class="form-control" /></div>
+        <div class="form-group"><label>Precio Venta (Bs) *</label><input type="number" step="0.01" id="l-price" class="form-control" required /></div>
+        <div class="form-group"><label>Stock</label><input type="number" id="l-stock" class="form-control" value="0" /></div>
+      </div>
+      <div class="form-group"><label>Estado</label><select id="l-active" class="form-control"><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-lente')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarLente()">Guardar Modelo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN TIPO LENTE -->
+<div class="modal-overlay" id="modal-tipo-lente">
+  <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-header"><h3>Nuevo Tipo de Lente</h3><button class="btn-icon" onclick="closeModal('modal-tipo-lente')"><i class="ph ph-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="t-name" class="form-control" required placeholder="Ej: Ocupacional" /></div>
+      <div class="form-group"><label>Descripción</label><textarea id="t-desc" class="form-control" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-tipo-lente')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarTipoLente()">Guardar Tipo</button>
+    </div>
   </div>
 </div>
 
@@ -212,130 +440,374 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpdmtnZXhzc2JseXRidWFlcmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3MjU2NjksImV4cCI6MjEwODMwMTY2OX0.LP7bsnx-l-XwGclQxjy_1RWR_YgfmKej9fdWbOPNm14';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => Number(n ?? 0).toLocaleString('es-BO', { minimumFractionDigits: 2 });
+  
+  let globalLenses = [];
+  let globalFrames = [];
+  let globalTypes = [];
+  let globalPedidos = [];
+  let currentOrder = null;
 
-  // ================= LOGIN =================
+  // ================= UTILS =================
+  function showToast(msg, type = 'success') {
+    const container = $('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="ph ${type==='success' ? 'ph-check-circle' : 'ph-warning-circle'}" style="font-size:1.5rem; color:var(--${type})"></i> <span>${msg}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+  }
+
+  window.switchView = function(viewId, el) {
+    document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    $(viewId).style.display = 'block';
+    if(el) el.classList.add('active');
+    $('page-title').textContent = el ? el.innerText : 'Panel';
+  };
+
+  window.closeModal = function(id) { $(id).classList.remove('active'); };
+  window.openModalCliente = function() { $('form-cliente').reset(); $('modal-cliente').classList.add('active'); };
+  window.openModalPedido = function() { 
+    $('form-pedido').reset(); 
+    calcularTotal(); 
+    const d = new Date(); d.setDate(d.getDate() + 5);
+    $('p-expected-date').value = d.toISOString().split('T')[0];
+    $('modal-pedido').classList.add('active'); 
+  };
+
+  // ================= AUTH =================
   $('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    $('btn').disabled = true; $('btn-text').textContent = 'Conectando...'; $('btn-spinner').style.display = 'inline-block';
-
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email: $('email').value.trim(), 
-      password: $('password').value 
-    });
-
-    if (error) {
-      $('msg').textContent = 'Correo o contraseña incorrectos';
-      $('msg').className = 'msg show error';
-      $('btn').disabled = false; $('btn-text').textContent = 'Ingresar'; $('btn-spinner').style.display = 'none';
-    } else {
-      cargarDashboard();
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email: $('email').value, password: $('password').value });
+    if (error) showToast('Credenciales incorrectas', 'error');
+    else cargarTodo();
   });
 
+  window.logout = async function() { await supabase.auth.signOut(); location.reload(); };
+
   // ================= CARGAR DATOS =================
-  async function cargarDashboard() {
+  async function cargarTodo() {
     $('login-view').style.display = 'none';
-    $('dashboard-view').style.display = 'block';
+    $('app-view').style.display = 'flex';
+    
     const { data: { user } } = await supabase.auth.getUser();
     $('user-email').textContent = user?.email || '';
 
-    const [resVentas, resMonturas, resClientes, resOT] = await Promise.all([
-      supabase.from('sales_orders').select('*').order('sales_order_id', { ascending: false }),
-      supabase.from('frames_catalog').select('*').order('frame_id', { ascending: false }),
-      supabase.from('customers').select('*').order('customer_id', { ascending: false }),
-      supabase.from('laboratory_work_orders').select('*', { count: 'exact', head: true })
+    // Cargar catálogos
+    const [resL, resF, resT] = await Promise.all([
+      supabase.from('lenses_catalog').select('*, lens_types(name)').eq('active', true),
+      supabase.from('frames_catalog').select('*').eq('active', true),
+      supabase.from('lens_types').select('*').eq('active', true)
     ]);
+    
+    globalLenses = resL.data || [];
+    globalFrames = resF.data || [];
+    globalTypes = resT.data || [];
 
-    // 1. Ventas
-    if (resVentas.data && resVentas.data.length > 0) {
-      document.querySelector('#tabla-ventas tbody').innerHTML = resVentas.data.map(v => `
-        <tr><td>${v.order_number}</td><td>Bs ${fmt(v.total)}</td><td>Bs ${fmt(v.amount_paid)}</td><td>Bs ${fmt(v.balance_due)}</td><td><span class="badge ok">${v.status}</span></td></tr>
-      `).join('');
-      $('kpi-ventas').textContent = `Bs ${fmt(resVentas.data.reduce((acc, v) => acc + Number(v.total), 0))}`;
-      $('kpi-saldo').textContent = `Bs ${fmt(resVentas.data.reduce((acc, v) => acc + Number(v.balance_due), 0))}`;
-    } else {
-      document.querySelector('#tabla-ventas tbody').innerHTML = '<tr><td colspan="5" class="empty">No hay ventas</td></tr>';
-      $('kpi-ventas').textContent = 'Bs 0.00'; $('kpi-saldo').textContent = 'Bs 0.00';
-    }
-
-    // 2. Monturas
-    if (resMonturas.data && resMonturas.data.length > 0) {
-      document.querySelector('#tabla-monturas tbody').innerHTML = resMonturas.data.map(m => `
-        <tr><td>${m.sku}</td><td>${m.model_name}</td><td>${m.style}</td><td>Bs ${fmt(m.list_price)}</td></tr>
-      `).join('');
-      $('kpi-monturas').textContent = resMonturas.data.length;
-    } else {
-      document.querySelector('#tabla-monturas tbody').innerHTML = '<tr><td colspan="4" class="empty">No hay monturas</td></tr>';
-      $('kpi-monturas').textContent = '0';
-    }
-
-    // 3. Clientes
-    if (resClientes.data && resClientes.data.length > 0) {
-      document.querySelector('#tabla-clientes tbody').innerHTML = resClientes.data.map(c => `
-        <tr><td>${c.name}</td><td>${c.document_number || '-'}</td><td>${c.phone || '-'}</td><td>${c.city || '-'}</td></tr>
-      `).join('');
-    } else {
-      document.querySelector('#tabla-clientes tbody').innerHTML = '<tr><td colspan="4" class="empty">No hay clientes</td></tr>';
-    }
-
-    // 4. OT
-    $('kpi-ot').textContent = resOT.count || 0;
+    llenarSelectores();
+    cargarClientes();
+    cargarPedidos();
+    cargarAdminMonturas();
+    cargarAdminLentes();
   }
 
-  // ================= NUEVO CLIENTE =================
-  $('btn-open-modal-cliente').addEventListener('click', () => { $('modal-cliente').classList.add('show'); $('form-cliente').reset(); });
-  $('btn-close-modal-cliente').addEventListener('click', () => $('modal-cliente').classList.remove('show'));
+  function llenarSelectores() {
+    $('p-lens').innerHTML = '<option value="">Seleccione Lente</option>' + 
+      globalLenses.map(l => `<option value="${l.lens_id}" data-price="${l.list_price}">${l.name} - Bs ${fmt(l.list_price)}</option>`).join('');
+    $('p-frame').innerHTML = '<option value="">Seleccione Montura</option>' + 
+      globalFrames.map(f => `<option value="${f.frame_id}" data-price="${f.list_price}">${f.name} - Bs ${fmt(f.list_price)}</option>`).join('');
+    $('l-type').innerHTML = '<option value="">Seleccione Tipo...</option>' + 
+      globalTypes.map(t => `<option value="${t.type_id}">${t.name}</option>`).join('');
+  }
 
-  $('form-cliente').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    $('btn-save-client').disabled = true; $('save-text-client').textContent = '...'; $('save-spinner-client').style.display = 'inline-block';
+  async function cargarClientes() {
+    const { data } = await supabase.from('customers').select('*').order('name');
+    if (!data) return;
+    $('tabla-clientes').querySelector('tbody').innerHTML = data.length ? data.map(c => `
+      <tr><td style="font-weight:500;">${c.name}</td><td>${c.phone}</td><td>${c.ci || '-'}</td><td>${new Date(c.created_at).toLocaleDateString()}</td></tr>
+    `).join('') : '<tr><td colspan="4" style="text-align:center;">No hay clientes</td></tr>';
+    $('p-customer').innerHTML = '<option value="">Seleccione un cliente...</option>' + data.map(c => `<option value="${c.customer_id}">${c.name} (${c.phone})</option>`).join('');
+    $('kpi-clientes').textContent = data.length;
+  }
 
-    const { error } = await supabase.from('customers').insert([{ 
-      name: $('c-name').value.trim(), document_number: $('c-doc').value.trim(), 
-      phone: $('c-phone').value.trim() || null, email: $('c-email').value.trim() || null, 
-      city: $('c-city').value.trim() || null, customer_type: 'MINORISTA'
-    }]);
-
-    if (error) alert('Error: ' + error.message);
-    else { $('modal-cliente').classList.remove('show'); alert('Cliente guardado'); cargarDashboard(); }
+  async function cargarPedidos() {
+    const { data, error } = await supabase.from('orders').select(`*, customers ( name, phone, ci )`).order('order_id', { ascending: false });
+    if (error) { console.error(error); return; }
+    globalPedidos = data || [];
     
-    $('btn-save-client').disabled = false; $('save-text-client').textContent = 'Guardar'; $('save-spinner-client').style.display = 'none';
-  });
+    let totalIngresos = 0, totalSaldo = 0, pendientes = 0, entregados = 0;
 
-  // ================= NUEVA MONTURA =================
-  $('btn-open-modal-montura').addEventListener('click', () => { $('modal-montura').classList.add('show'); $('form-montura').reset(); });
-  $('btn-close-modal-montura').addEventListener('click', () => $('modal-montura').classList.remove('show'));
+    // 1. Llenar tabla principal de pedidos
+    const rows = globalPedidos.map(p => {
+      totalIngresos += Number(p.amount_paid);
+      totalSaldo += Number(p.balance_due);
+      if (p.status !== 'ENTREGADO' && p.status !== 'CANCELADO') pendientes++;
+      if (p.status === 'ENTREGADO') entregados++;
 
-  $('form-montura').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    $('btn-save-montura').disabled = true; $('save-text-montura').textContent = '...'; $('save-spinner-montura').style.display = 'inline-block';
+      const isAtrasado = p.status !== 'ENTREGADO' && p.status !== 'CANCELADO' && p.expected_date && new Date(p.expected_date) < new Date().setHours(0,0,0,0);
+      let badgeClass = 'info';
+      if(p.status === 'ENTREGADO') badgeClass = 'success';
+      if(p.status === 'CANCELADO') badgeClass = 'danger';
+      if(p.status === 'EN_PREPARACION') badgeClass = 'warning';
 
-    const { error } = await supabase.from('frames_catalog').insert([{ 
-      sku: $('m-sku').value.trim(), model_name: $('m-model').value.trim(), 
-      style: $('m-style').value, color: $('m-color').value.trim() || null,
-      list_price: parseFloat($('m-price').value), cost: parseFloat($('m-cost').value) || 0
-    }]);
+      return `
+        <tr>
+          <td style="font-weight:600;">#${p.order_id.toString().padStart(4, '0')}</td>
+          <td><div style="font-weight:500;">${p.customers?.name || 'Desc.'}</div><div style="font-size:0.8rem; color:var(--text-light);">${p.customers?.phone || ''}</div></td>
+          <td><div style="font-size:0.85rem;">L: ${p.lens_description?.substring(0,15)}...</div><div style="font-size:0.85rem;">M: ${p.frame_description?.substring(0,15)}...</div></td>
+          <td style="font-weight:600;">Bs ${fmt(p.total_amount)}</td>
+          <td style="color: ${p.balance_due > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">Bs ${fmt(p.balance_due)}</td>
+          <td>${p.expected_date || '-'} ${isAtrasado ? '<span class="badge danger" style="margin-left:4px;">Atrasado</span>' : ''}</td>
+          <td><span class="badge ${badgeClass}">${p.status.replace(/_/g, ' ')}</span><div style="font-size:0.75rem; margin-top:4px; color:var(--text-light);">${p.payment_status}</div></td>
+          <td><button class="btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="verPedido(${p.order_id})">Gestionar</button></td>
+        </tr>
+      `;
+    });
 
-    if (error) alert('Error: ' + error.message);
-    else { $('modal-montura').classList.remove('show'); alert('Montura guardada'); cargarDashboard(); }
+    $('tabla-pedidos').querySelector('tbody').innerHTML = rows.length ? rows.join('') : '<tr><td colspan="8" style="text-align:center;">No hay pedidos registrados</td></tr>';
     
-    $('btn-save-montura').disabled = false; $('save-text-montura').textContent = 'Guardar'; $('save-spinner-montura').style.display = 'none';
-  });
+    // 2. Actualizar KPIs
+    $('kpi-ingresos').textContent = `Bs ${fmt(totalIngresos)}`;
+    $('kpi-saldo').textContent = `Bs ${fmt(totalSaldo)}`;
+    $('kpi-pendientes').textContent = pendientes;
+    $('kpi-entregados').textContent = entregados;
 
-  // ================= LOGOUT =================
-  $('logout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    $('dashboard-view').style.display = 'none'; $('login-view').style.display = 'grid';
-    $('login-form').reset(); $('msg').className = 'msg';
-    $('btn').disabled = false; $('btn-text').textContent = 'Ingresar'; $('btn-spinner').style.display = 'none';
-  });
+    // 3. Llenar Tabla de "Últimos 5 Pedidos" en Dashboard
+    const ultimos5 = globalPedidos.slice(0, 5);
+    if(ultimos5.length > 0) {
+      $('tabla-ultimos-pedidos').querySelector('tbody').innerHTML = ultimos5.map(p => `
+        <tr>
+          <td style="font-weight:600;">#${p.order_id.toString().padStart(4, '0')}</td>
+          <td>${p.customers?.name}</td>
+          <td>Bs ${fmt(p.total_amount)}</td>
+          <td style="color: ${p.balance_due > 0 ? 'var(--danger)' : 'var(--success)'};">Bs ${fmt(p.balance_due)}</td>
+          <td><span class="badge ${p.status === 'ENTREGADO' ? 'success' : 'info'}">${p.status}</span></td>
+        </tr>
+      `).join('');
+    } else {
+      $('tabla-ultimos-pedidos').querySelector('tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay pedidos recientes</td></tr>';
+    }
 
-  // ================= SESIÓN ACTIVA =================
+    // 4. Llenar Tabla de "Pedidos Atrasados"
+    const atrasados = globalPedidos.filter(p => p.status !== 'ENTREGADO' && p.status !== 'CANCELADO' && p.expected_date && new Date(p.expected_date) < new Date().setHours(0,0,0,0));
+    if (atrasados.length > 0) {
+      $('panel-atrasados').style.display = 'block';
+      $('tabla-atrasados').querySelector('tbody').innerHTML = atrasados.map(p => `
+        <tr>
+          <td style="font-weight:600;">#${p.order_id.toString().padStart(4, '0')}</td>
+          <td>${p.customers?.name}</td>
+          <td style="color:var(--danger); font-weight:600;">${p.expected_date}</td>
+          <td><span class="badge warning">${p.status.replace(/_/g, ' ')}</span></td>
+        </tr>
+      `).join('');
+    } else {
+      $('panel-atrasados').style.display = 'none';
+    }
+  }
+
+  // ================= ADMIN: CARGAR TABLAS =================
+  async function cargarAdminMonturas() {
+    const { data } = await supabase.from('frames_catalog').select('*').order('name');
+    $('tabla-admin-monturas').querySelector('tbody').innerHTML = data.map(m => `
+      <tr>
+        <td>${m.name}</td><td>${m.brand || '-'}</td><td>${m.category || '-'}</td>
+        <td>Bs ${fmt(m.cost)}</td><td style="font-weight:600;">Bs ${fmt(m.list_price)}</td>
+        <td>${m.stock || 0}</td>
+        <td><span class="badge ${m.active ? 'success' : 'danger'}">${m.active ? 'ACTIVO' : 'INACTIVO'}</span></td>
+        <td><button class="btn-secondary btn-sm" onclick='editMontura(${JSON.stringify(m)})'>Editar</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function cargarAdminLentes() {
+    const { data: types } = await supabase.from('lens_types').select('*').order('name');
+    $('tabla-tipos-lentes').querySelector('tbody').innerHTML = types.map(t => `
+      <tr><td>${t.name}</td><td><span class="badge ${t.active ? 'success' : 'danger'}">${t.active ? 'ACTIVO' : 'INACTIVO'}</span></td></tr>
+    `).join('');
+
+    const { data: lenses } = await supabase.from('lenses_catalog').select(`*, lens_types(name)`).order('name');
+    $('tabla-admin-lentes').querySelector('tbody').innerHTML = lenses.map(l => `
+      <tr>
+        <td>${l.name}</td><td>${l.lens_types?.name || '-'}</td><td>${l.brand || '-'}</td>
+        <td style="font-weight:600;">Bs ${fmt(l.list_price)}</td><td>${l.stock || 0}</td>
+        <td><span class="badge ${l.active ? 'success' : 'danger'}">${l.active ? 'ACTIVO' : 'INACTIVO'}</span></td>
+        <td><button class="btn-secondary btn-sm" onclick='editLente(${JSON.stringify(l)})'>Editar</button></td>
+      </tr>
+    `).join('');
+  }
+
+  // ================= GUARDAR CLIENTE =================
+  window.guardarCliente = async function() {
+    const name = $('c-name').value.trim(), phone = $('c-phone').value.trim(), ci = $('c-ci').value.trim() || null;
+    if (!name || !phone) return showToast('Nombre y celular son obligatorios', 'error');
+    const { error } = await supabase.from('customers').insert([{ name, phone, ci }]);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Cliente registrado'); closeModal('modal-cliente'); cargarClientes(); }
+  };
+
+  // ================= PEDIDO =================
+  window.calcularTotal = function() {
+    const lSel = $('p-lens'), fSel = $('p-frame');
+    const lPrice = lSel.selectedIndex > 0 ? parseFloat(lSel.options[lSel.selectedIndex].dataset.price) : 0;
+    const fPrice = fSel.selectedIndex > 0 ? parseFloat(fSel.options[fSel.selectedIndex].dataset.price) : 0;
+    const discount = parseFloat($('p-discount').value) || 0;
+    $('p-lens-price').value = lPrice.toFixed(2);
+    $('p-frame-price').value = fPrice.toFixed(2);
+    $('p-total-display').textContent = `Bs ${fmt((lPrice + fPrice) - discount)}`;
+  };
+
+  window.guardarPedido = async function() {
+    const btn = $('btn-save-pedido'); btn.disabled = true; btn.textContent = 'Guardando...';
+    const customerId = $('p-customer').value, lensId = $('p-lens').value, frameId = $('p-frame').value, advance = parseFloat($('p-advance').value) || 0;
+    if (!customerId || !lensId || !frameId) { showToast('Complete los campos obligatorios', 'error'); btn.disabled = false; btn.textContent = 'Guardar Pedido'; return; }
+
+    const lText = $('p-lens').options[$('p-lens').selectedIndex].text.split(' -')[0];
+    const fText = $('p-frame').options[$('p-frame').selectedIndex].text.split(' -')[0];
+
+    const { data: order, error: oErr } = await supabase.from('orders').insert([{
+      customer_id: customerId, lens_id: lensId, frame_id: frameId,
+      lens_description: lText, frame_description: fText,
+      lens_price: parseFloat($('p-lens-price').value), frame_price: parseFloat($('p-frame-price').value),
+      discount: parseFloat($('p-discount').value) || 0, expected_date: $('p-expected-date').value,
+      od_sph: $('p-od-sph').value || null, od_cyl: $('p-od-cyl').value || null, od_axis: $('p-od-axis').value || null, od_add: $('p-od-add').value || null,
+      oi_sph: $('p-oi-sph').value || null, oi_cyl: $('p-oi-cyl').value || null, oi_axis: $('p-oi-axis').value || null, oi_add: $('p-oi-add').value || null
+    }]).select().single();
+
+    if (oErr) showToast(oErr.message, 'error');
+    else {
+      if (advance > 0) await supabase.from('payments').insert([{ order_id: order.order_id, amount: advance }]);
+      showToast('Pedido registrado'); closeModal('modal-pedido'); cargarPedidos();
+    }
+    btn.disabled = false; btn.textContent = 'Guardar Pedido';
+  };
+
+  // ================= GESTIONAR PEDIDO =================
+  window.verPedido = function(id) {
+    const p = globalPedidos.find(x => x.order_id === id);
+    if (!p) return; currentOrder = p;
+    $('ver-order-id').textContent = `#${p.order_id.toString().padStart(4, '0')}`;
+    
+    let rxHTML = (p.od_sph || p.oi_sph) ? `<div style="background:#f9fafb; padding:12px; border-radius:8px; margin-top:12px; font-size:0.9rem;"><strong>Receta:</strong><br>OD: ${p.od_sph||'-'} | ${p.od_cyl||'-'} | ${p.od_axis||'-'}<br>OI: ${p.oi_sph||'-'} | ${p.oi_cyl||'-'} | ${p.oi_axis||'-'}</div>` : '';
+
+    $('ver-order-content').innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div><div style="font-size:0.8rem; color:var(--text-light);">Cliente</div><div style="font-weight:600;">${p.customers.name}</div><div>${p.customers.phone}</div></div>
+        <div><div style="font-size:0.8rem; color:var(--text-light);">Estado</div><div><span class="badge info">${p.status}</span></div></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div><div style="font-size:0.8rem; color:var(--text-light);">Lente</div><div>${p.lens_description}</div><div style="font-weight:600;">Bs ${fmt(p.lens_price)}</div></div>
+        <div><div style="font-size:0.8rem; color:var(--text-light);">Montura</div><div>${p.frame_description}</div><div style="font-weight:600;">Bs ${fmt(p.frame_price)}</div></div>
+      </div>
+      ${rxHTML}
+      <hr style="margin:16px 0; border:0; border-top:1px solid var(--border);">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total:</span> <strong>Bs ${fmt(p.total_amount)}</strong></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:var(--success);"><span>Pagado:</span> <strong>Bs ${fmt(p.amount_paid)}</strong></div>
+      <div style="display:flex; justify-content:space-between; color:var(--danger); font-size:1.1rem;"><span>Saldo:</span> <strong>Bs ${fmt(p.balance_due)}</strong></div>
+    `;
+
+    $('btn-entregar').style.display = (p.status === 'ENTREGADO') ? 'none' : 'inline-flex';
+    $('pay-amount').value = p.balance_due > 0 ? p.balance_due.toFixed(2) : '0.00';
+    $('modal-ver-pedido').classList.add('active');
+  };
+
+  window.registrarPago = async function() {
+    const amt = parseFloat($('pay-amount').value);
+    if (!amt || amt <= 0) return showToast('Monto inválido', 'error');
+    if (amt > currentOrder.balance_due) return showToast('El pago supera el saldo pendiente', 'error');
+    const { error } = await supabase.from('payments').insert([{ order_id: currentOrder.order_id, amount: amt, payment_method: $('pay-method').value }]);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Pago registrado'); closeModal('modal-ver-pedido'); cargarPedidos(); }
+  };
+
+  window.marcarEntregado = async function() {
+    if (!confirm('¿Confirmas la entrega del pedido?')) return;
+    const { error } = await supabase.from('orders').update({ status: 'ENTREGADO', actual_delivery_date: new Date().toISOString().split('T')[0] }).eq('order_id', currentOrder.order_id);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Pedido entregado'); closeModal('modal-ver-pedido'); cargarPedidos(); }
+  };
+
+  // ================= ADMIN: MONTURAS =================
+  window.openModalMontura = function() {
+    $('form-pedido').reset(); $('m-id').value = ''; $('title-modal-montura').textContent = 'Nueva Montura'; $('modal-montura').classList.add('active');
+  };
+  window.editMontura = function(m) {
+    $('m-id').value = m.frame_id; $('m-name').value = m.name; $('m-brand').value = m.brand || ''; $('m-category').value = m.category || '';
+    $('m-color').value = m.color || ''; $('m-cost').value = m.cost; $('m-price').value = m.list_price; $('m-stock').value = m.stock || 0; $('m-active').value = m.active;
+    $('title-modal-montura').textContent = 'Editar Montura'; $('modal-montura').classList.add('active');
+  };
+  window.guardarMontura = async function() {
+    const id = $('m-id').value;
+    const payload = { name: $('m-name').value, brand: $('m-brand').value, category: $('m-category').value, color: $('m-color').value, cost: parseFloat($('m-cost').value)||0, list_price: parseFloat($('m-price').value), stock: parseInt($('m-stock').value)||0, active: $('m-active').value === 'true' };
+    if (!payload.name || !payload.list_price) return showToast('Nombre y precio son obligatorios', 'error');
+    
+    const { error } = id ? await supabase.from('frames_catalog').update(payload).eq('frame_id', id) : await supabase.from('frames_catalog').insert([payload]);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Montura guardada'); closeModal('modal-montura'); cargarAdminMonturas(); cargarTodo(); }
+  };
+
+  // ================= ADMIN: LENTES =================
+  window.openModalLente = function() {
+    $('form-pedido').reset(); $('l-id').value = ''; $('title-modal-lente').textContent = 'Nuevo Modelo'; $('modal-lente').classList.add('active');
+  };
+  window.editLente = function(l) {
+    $('l-id').value = l.lens_id; $('l-name').value = l.name; $('l-type').value = l.type_id || ''; $('l-brand').value = l.brand || '';
+    $('l-material').value = l.features || ''; $('l-cost').value = l.cost; $('l-price').value = l.list_price; $('l-stock').value = l.stock || 0; $('l-active').value = l.active;
+    $('title-modal-lente').textContent = 'Editar Modelo'; $('modal-lente').classList.add('active');
+  };
+  window.guardarLente = async function() {
+    const id = $('l-id').value;
+    const payload = { name: $('l-name').value, type_id: $('l-type').value, brand: $('l-brand').value, features: $('l-material').value, cost: parseFloat($('l-cost').value)||0, list_price: parseFloat($('l-price').value), stock: parseInt($('l-stock').value)||0, active: $('l-active').value === 'true' };
+    if (!payload.name || !payload.list_price || !payload.type_id) return showToast('Nombre, tipo y precio son obligatorios', 'error');
+    
+    const { error } = id ? await supabase.from('lenses_catalog').update(payload).eq('lens_id', id) : await supabase.from('lenses_catalog').insert([payload]);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Lente guardado'); closeModal('modal-lente'); cargarAdminLentes(); cargarTodo(); }
+  };
+
+  window.openModalTipoLente = function() { $('t-name').value=''; $('t-desc').value=''; $('modal-tipo-lente').classList.add('active'); };
+  window.guardarTipoLente = async function() {
+    const name = $('t-name').value.trim();
+    if (!name) return showToast('El nombre es obligatorio', 'error');
+    const { error } = await supabase.from('lens_types').insert([{ name, description: $('t-desc').value }]);
+    if (error) showToast(error.message, 'error');
+    else { showToast('Tipo guardado'); closeModal('modal-tipo-lente'); cargarAdminLentes(); cargarTodo(); }
+  };
+
+  // ================= IMPRIMIR =================
+  window.imprimirComprobante = function() {
+    if (!currentOrder) return; const p = currentOrder;
+    const rxCss = `font-size: 11px; margin-bottom: 10px;`, bdCss = `border-bottom: 1px dashed #000; margin: 10px 0;`;
+    let rxHTML = (p.od_sph || p.oi_sph) ? `<div style="${rxCss}"><strong>RECETA ÓPTICA</strong><br>OD: ${p.od_sph||'-'} | ${p.od_cyl||'-'} | ${p.od_axis||'-'}<br>OI: ${p.oi_sph||'-'} | ${p.oi_cyl||'-'} | ${p.oi_axis||'-'}</div>` : '';
+
+    const html = `
+      <div class="receipt-header"><h2 style="margin:0; font-size:18px;">ÓPTICA ISRAEL</h2><p style="margin:4px 0; font-size:12px;">Comprobante de Pedido</p><p style="margin:0; font-size:14px; font-weight:bold;">Pedido #${p.order_id.toString().padStart(4, '0')}</p></div>
+      <div style="${rxCss}"><strong>CLIENTE:</strong> ${p.customers.name}<br><strong>TELÉFONO:</strong> ${p.customers.phone}<br>${p.customers.ci ? `<strong>CI:</strong> ${p.customers.ci}<br>` : ''}</div><div style="${bdCss}"></div>
+      <div style="${rxCss}"><strong>PRODUCTOS</strong><br>Lente: ${p.lens_description}<br>Montura: ${p.frame_description}</div><div style="${bdCss}"></div>
+      ${rxHTML}
+      <table class="receipt-table" style="margin-top:15px;">
+        <tr><td>Lente:</td><td align="right">Bs ${fmt(p.lens_price)}</td></tr>
+        <tr><td>Montura:</td><td align="right">Bs ${fmt(p.frame_price)}</td></tr>
+        ${p.discount > 0 ? `<tr><td>Descuento:</td><td align="right">- Bs ${fmt(p.discount)}</td></tr>` : ''}
+        <tr><td><strong>TOTAL:</strong></td><td align="right"><strong>Bs ${fmt(p.total_amount)}</strong></td></tr>
+        <tr><td>Anticipo:</td><td align="right">Bs ${fmt(p.amount_paid)}</td></tr>
+        <tr><td><strong>SALDO:</strong></td><td align="right"><strong>Bs ${fmt(p.balance_due)}</strong></td></tr>
+      </table><div style="${bdCss}"></div>
+      <div style="${rxCss}"><strong>Fechas:</strong><br>Recepción: ${p.reception_date}<br>Entrega Estimada: ${p.expected_date}<br>Entrega Real: ${p.actual_delivery_date || 'Pendiente'}</div>
+      <div style="text-align:center; font-size:10px; margin-top:20px; color:#555;">¡Gracias por su preferencia!</div>
+    `;
+
+    const printWindow = window.open('', '', 'height=600,width=400');
+    printWindow.document.write('<html><head><title>Comprobante</title><style>.receipt{font-family:"Courier New",monospace;color:#000;padding:20px;max-width:400px;margin:0 auto;} .receipt-header{text-align:center;margin-bottom:20px;border-bottom:1px dashed #000;padding-bottom:10px;} .receipt-table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:12px;} .receipt-table td{padding:4px 0;border:none;}</style></head><body>');
+    printWindow.document.write(`<div class="receipt">${html}</div>`);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close(); printWindow.focus(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+  };
+
+  // ================= INICIO =================
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) cargarDashboard();
+  if (session) cargarTodo();
 </script>
 </body>
 </html>
